@@ -1,7 +1,7 @@
 // My Tasks Basic
 
 // HTML Elements
-let goBtnEl = document.getElementById("go-btn");
+let taskInputEl = document.getElementById("task-input");
 let menuEl = document.getElementById("menu");
 let tasksEl = document.getElementById("tasks");
 
@@ -10,31 +10,21 @@ let tasks = loadTasks();
 displayAll();
 
 // Go Btn - Menu Listener
-goBtnEl.addEventListener("click", goBtnHandler);
+taskInputEl.addEventListener("keydown", taskSubmitHandler);
 
-function goBtnHandler() {
-  // Get Menu Selection
-  let selection = menuEl.value;
-
-  if (selection === "add") {
-    addTask();
-  } else if (selection === "toggle") {
-    toggleTask();
-  } else if (selection === "remove") {
-    removeTask();
-  } else if (selection === "clear") {
-    clearAll();
+function taskSubmitHandler(e) {
+  if (e.code === "Enter") {
+    newTask();
+    // Add Submitted Task
+    let userTask = taskInputEl.value;
+    tasks.push(newTask(userTask));
+    saveTasks();
+    displayAll();
+    taskInputEl.value = "";
   }
 }
 
 // MENU FUNCTIONS
-function addTask() {
-  let description = prompt("Enter task description:");
-  tasks.push(newTask(description));
-  saveTasks();
-  displayAll();
-}
-
 // Toggle completed status of a task
 function toggleTask() {
   let index = prompt("Enter # of task:");
@@ -57,7 +47,7 @@ function removeTask() {
     saveTasks();
     displayAll();
   } else {
-    alert('Invalid Task #');
+    alert("Invalid Task #");
   }
 }
 
@@ -79,20 +69,36 @@ function newTask(taskDescription) {
 
 // Display All tasks in global tasks array
 function displayAll() {
-  let outputStr = "";
   for (let i = 0; i < tasks.length; i++) {
-    outputStr += getTaskHTMLStr(tasks[i], i);
+    tasksEl.appendChild(getTaskHTML(tasks[i], i));
   }
   tasksEl.innerHTML = outputStr;
 }
 
 // Get html for given task
-function getTaskHTMLStr(task, i) {
-  return `
-    <div class="${task.completed}">
-      ${i}; ${task.description}
-    </div>
-  `;
+function getTaskHTML(task, index) {
+  // use java to build the task <div>
+
+  // Check box element
+  let checkboxEl = document.createElement("input");
+  checkboxEl.type = "checkbox";
+  checkboxEl.addEventListener("input", checkBoxHandler);
+
+  // task description text node
+  let textEl = document.createTextNode(task.description);
+
+  // remove button
+  let buttonEl = document.createElement("button");
+  buttonEl.innerHTML = "Remove";
+  buttonEl.addEventListener("click", removeBtnHandler);
+
+  // add everything to a div element
+  let divEl = document.createElement("div");
+  divEl.appendChild(checkboxEl);
+  divEl.appendChild(textEl);
+  divEl.appendChild(buttonEl);
+
+  return divEl;
 }
 
 // Save global tasks to local storage
@@ -105,3 +111,8 @@ function loadTasks() {
   let tasksStr = localStorage.getItem("tasks");
   return JSON.parse(tasksStr) ?? [];
 }
+
+// event functions
+function checkBoxHandler(e) {}
+
+function removeBtnHandler(e) {}
