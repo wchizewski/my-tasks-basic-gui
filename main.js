@@ -27,8 +27,8 @@ function taskSubmitHandler(e) {
 // MENU FUNCTIONS
 // Toggle completed status of a task
 function toggleTask() {
-  let index = prompt("Enter # of task:");
-  let task = tasks[index];
+  let taskIndex = +prompt("Enter # of task:");
+  let task = tasks[taskIndex];
   if (task.completed === "") {
     task.completed = "completed";
   } else {
@@ -40,15 +40,10 @@ function toggleTask() {
 
 // Remove a task by index
 function removeTask() {
-  let index = +prompt("Enter # of task:");
-  if (index >= 0 && index < tasks.length) {
-    // Valid Index -> Remove
-    tasks.splice(index, 1);
-    saveTasks();
-    displayAll();
-  } else {
-    alert("Invalid Task #");
-  }
+  let taskIndex = +prompt("Enter # of task:");
+  tasks.splice(taskIndex, 1);
+  saveTasks();
+  displayAll();
 }
 
 // Clear all tasks
@@ -63,16 +58,16 @@ function clearAll() {
 function newTask(taskDescription) {
   return {
     description: taskDescription,
-    completed: "",
+    completed: false,
   };
 }
 
 // Display All tasks in global tasks array
 function displayAll() {
+  tasksEl.innerHTML = "";
   for (let i = 0; i < tasks.length; i++) {
     tasksEl.appendChild(getTaskHTML(tasks[i], i));
   }
-  tasksEl.innerHTML = outputStr;
 }
 
 // Get html for given task
@@ -82,20 +77,27 @@ function getTaskHTML(task, index) {
   // Check box element
   let checkboxEl = document.createElement("input");
   checkboxEl.type = "checkbox";
+  checkboxEl.dataset.index = index;
+  checkboxEl.checked = task.completed;
   checkboxEl.addEventListener("input", checkBoxHandler);
 
   // task description text node
-  let textEl = document.createTextNode(task.description);
+  let textSpanEl = document.createElement("span");
+  textSpanEl.innerHTML = task.description;
+  if (task.completed) {
+    textSpanEl.className = "completed";
+  }
 
   // remove button
   let buttonEl = document.createElement("button");
   buttonEl.innerHTML = "Remove";
+  buttonEl.dataset.index = index;
   buttonEl.addEventListener("click", removeBtnHandler);
 
   // add everything to a div element
   let divEl = document.createElement("div");
   divEl.appendChild(checkboxEl);
-  divEl.appendChild(textEl);
+  divEl.appendChild(textSpanEl);
   divEl.appendChild(buttonEl);
 
   return divEl;
@@ -113,6 +115,19 @@ function loadTasks() {
 }
 
 // event functions
-function checkBoxHandler(e) {}
+function checkBoxHandler(e) {
+  // get index of tasks to toggle
+  let taskIndex = +e.target.dataset.index;
+  let task = tasks[taskIndex];
+  task.completed = !task.completed;
+  saveTasks();
+  displayAll();
+}
 
-function removeBtnHandler(e) {}
+function removeBtnHandler(e) {
+  // Get index of task to remove
+  let taskIndex = +e.target.dataset.index;
+  tasks.splice(taskIndex, 1);
+  saveTasks();
+  displayAll();
+}
